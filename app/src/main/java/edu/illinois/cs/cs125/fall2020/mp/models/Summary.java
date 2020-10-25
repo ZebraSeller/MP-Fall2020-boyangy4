@@ -170,6 +170,7 @@ public class Summary implements SortedListAdapter.ViewModel {
    * @param courses list of all courses.
    * @param text text in search bar to compare with.
    * @return filtered list of courses.
+   * ok
    */
   public static List<Summary> filter(
       @NonNull final List<Summary> courses, @NonNull final String text) {
