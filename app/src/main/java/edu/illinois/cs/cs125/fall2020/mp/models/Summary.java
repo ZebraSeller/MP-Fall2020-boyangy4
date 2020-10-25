@@ -1,9 +1,12 @@
 package edu.illinois.cs.cs125.fall2020.mp.models;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -136,11 +139,52 @@ public class Summary implements SortedListAdapter.ViewModel {
     return equals(model);
   }
 
-  public static final Comparator<Summary> COMPARATOR =
-      (courseModel1, courseModel2) -> 0;
-
+  /** Comparator.
+   * Compares courseModel1 & courseModel2 by 1. dept. 2. number. 3. title.
+   */
+  public static final Comparator<Summary> COMPARATOR = (courseModel1, courseModel2) -> {
+    if (courseModel1.department.compareTo(courseModel2.department) > 0) {
+      return 1;
+    } else if (courseModel1.department.compareTo(courseModel2.department) < 0) {
+      return -1;
+    } else if (courseModel1.department.compareTo(courseModel2.department) == 0) {
+      if (courseModel1.number.compareTo(courseModel2.number) > 0) {
+        return 1;
+      } else if (courseModel1.number.compareTo(courseModel2.number) < 0) {
+        return -1;
+      } else if (courseModel1.number.compareTo(courseModel2.number) == 0) {
+        if (courseModel1.title.compareTo(courseModel2.title) > 0) {
+          return 1;
+        } else if (courseModel1.title.compareTo(courseModel2.title) < 0) {
+          return -1;
+        } else if (courseModel1.title.compareTo(courseModel2.title) == 0) {
+          return 0;
+        }
+      }
+    }
+    Log.wtf("Error", "Comparator Failed, returning 0");
+    return 0;
+  };
+  /**Filter.
+   * Filters out summary objects that do not match text in search bar.
+   * @param courses list of all courses.
+   * @param text text in search bar to compare with.
+   * @return filtered list of courses.
+   */
   public static List<Summary> filter(
       @NonNull final List<Summary> courses, @NonNull final String text) {
-    return courses;
+    String lCText = text.toLowerCase();
+    List<Summary> result = new ArrayList<>();
+    for (Summary course : courses) {
+      if (course.title.toLowerCase().contains(lCText)
+              || course.department.toLowerCase().contains(lCText)
+              || course.number.toLowerCase().contains(lCText)
+              || course.year.toLowerCase().contains(lCText)
+              || course.semester.toLowerCase().contains(lCText)) {
+        result.add(course);
+      }
+    }
+    return result;
   }
 }
+
