@@ -71,7 +71,14 @@ public class Summary implements SortedListAdapter.ViewModel {
   public final String getTitle() {
     return title;
   }
-
+  /**
+   * Get the UI String.
+   *
+   * @return the UI String in format required.
+   */
+  public String getUIString() {
+    return department + " " + number + ": " + title;
+  }
   /**
    * Create an empty Summary.
    */
@@ -177,11 +184,13 @@ public class Summary implements SortedListAdapter.ViewModel {
     String lCText = text.toLowerCase();
     List<Summary> result = new ArrayList<>();
     for (Summary course : courses) {
+      String combined = course.department + " " +  course.number;
       if (course.title.toLowerCase().contains(lCText)
               || course.department.toLowerCase().contains(lCText)
               || course.number.toLowerCase().contains(lCText)
               || course.year.toLowerCase().contains(lCText)
-              || course.semester.toLowerCase().contains(lCText)) {
+              || course.semester.toLowerCase().contains(lCText)
+              || combined.toLowerCase().contains(lCText)) {
         result.add(course);
       }
     }
