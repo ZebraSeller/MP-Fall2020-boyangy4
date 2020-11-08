@@ -5,6 +5,11 @@ import android.os.Bundle;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import edu.illinois.cs.cs125.fall2020.mp.R;
 import edu.illinois.cs.cs125.fall2020.mp.application.CourseableApplication;
 import edu.illinois.cs.cs125.fall2020.mp.databinding.ActivityCourseBinding;
@@ -16,6 +21,8 @@ import edu.illinois.cs.cs125.fall2020.mp.network.Client;
  * CourseActivity for displaying specific course's description & title etc.
  */
 public class CourseActivity extends MainActivity implements Client.CourseClientCallbacks {
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+
   private static final String TAG = CourseActivity.class.getSimpleName();
 
   //Bind to the layout activity_course.xml.
@@ -33,10 +40,15 @@ public class CourseActivity extends MainActivity implements Client.CourseClientC
     binding = DataBindingUtil.setContentView(this, R.layout.activity_course);
 
     Intent intent = getIntent();
-    System.out.println(intent.getStringExtra("SUMMARY"));
-    String[] parts = intent.getStringExtra("SUMMARY").split("/");
-    final int four = 4;
-    Summary key = new Summary(parts[0], parts[1], parts[2], parts[3], parts[four]);
+    String courseJSON = intent.getStringExtra("COURSE");
+    Summary key = null;
+    try {
+      ObjectNode node = (ObjectNode) MAPPER.readTree(courseJSON);
+      key = new Summary(node.get("year").asText(), node.get("semester").asText(),
+          node.get("department").asText(), node.get("number").asText(), node.get("title").asText());
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
 
     CourseableApplication application = (CourseableApplication) getApplication();
     application.getCourseClient().getCourse(key, this);

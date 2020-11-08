@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity
   @Override
   public void onCourseClicked(final Summary course) {
     Intent startCourseActivity = new Intent(this, CourseActivity.class);
-    startCourseActivity.putExtra("SUMMARY", course.toString());
+    startCourseActivity.putExtra("COURSE", course.toStringJSON());
     startActivity(startCourseActivity);
   }
 }
