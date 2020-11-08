@@ -14,10 +14,10 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackground"
-        android:gravity="center_vertical"
+        android:background="#191919"
         android:clickable="true"
         android:focusable="true"
+        android:gravity="center_vertical"
         android:onClick="@{view -> listener.onCourseClicked(model)}">
 
         <TextView
@@ -25,7 +25,8 @@
             android:layout_height="wrap_content"
             android:padding="8dp"
             android:text="@{model.UIString}"
-            android:textColor="@android:color/black"
+            android:textColor="#D5BF6F"
+            android:textColorHighlight="#FFF5D3"
             android:textSize="22sp" />
 
     </LinearLayout>
