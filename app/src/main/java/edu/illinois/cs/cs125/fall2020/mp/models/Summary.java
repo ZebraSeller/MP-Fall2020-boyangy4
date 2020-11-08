@@ -7,8 +7,6 @@ import androidx.annotation.NonNull;
 import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -136,24 +134,15 @@ public class Summary implements SortedListAdapter.ViewModel {
   }
 
   /**
-   * Summary to String, No title.
-   * @return Summary to String, No title.
+   * Summary to String in JSON formatting.
+   * @return Summary JSON format string containing information of this summary.
    */
   public String toStringJSON() {
-    String result = null;
-    try {
-      JSONObject jSONString = new JSONObject()
-          .put("year", year)
-          .put("semester", semester)
-          .put("department", department)
-          .put("number", number)
-          .put("title", title);
-      result = jSONString.toString();
-    } catch (JSONException e) {
-      e.printStackTrace();
-    }
-
-    return result;
+    return "{" + "\"year\":\"" + year
+        + "\",\"semester\":\"" + semester
+        + "\",\"department\":\"" + department
+        + "\",\"number\":\"" + number
+        + "\",\"title\":\"" + title + "\"" + "}";
   }
 
   /**
