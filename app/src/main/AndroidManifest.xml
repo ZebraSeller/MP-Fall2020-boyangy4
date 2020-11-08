@@ -21,5 +21,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="edu.illinois.cs.cs125.fall2020.mp.activities.CourseActivity" />
     </application>
 </manifest>

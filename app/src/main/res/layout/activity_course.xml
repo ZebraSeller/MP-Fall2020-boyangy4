@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <variable
+            name="Course"
+            type="edu.illinois.cs.cs125.fall2020.mp.models.Course" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textTitle"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:textAlignment="center"
+            android:textColor="#3F51B5"
+            android:textSize="36sp" />
+
+        <TextView
+            android:id="@+id/textDescription"
+            android:layout_width="match_parent"
+            android:layout_height="245dp"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+</layout>

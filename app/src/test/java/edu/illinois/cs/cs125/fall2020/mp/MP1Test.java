@@ -39,6 +39,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 //import edu.illinois.cs.cs125.fall2020.mp.activities.CourseActivity;
+import edu.illinois.cs.cs125.fall2020.mp.activities.CourseActivity;
 import edu.illinois.cs.cs125.fall2020.mp.activities.MainActivity;
 import edu.illinois.cs.cs125.fall2020.mp.application.CourseableApplication;
 import edu.illinois.cs.cs125.fall2020.mp.models.Course;
@@ -190,41 +191,41 @@ public final class MP1Test {
     /**
      * Test the client getCourse method
      */
-//    @Test(timeout = 20000L)
-//    @Graded(points = 20)
-//    public void testClientGetCourse() throws JsonProcessingException, InterruptedException, ExecutionException {
-//      Client client = Client.start();
-//
-//      for (String summaryString : summaries) {
-//        Summary summary = mapper.readValue(summaryString, Summary.class);
-//        CompletableFuture<Course> completableFuture = new CompletableFuture<>();
-//        client.getCourse(summary, new Client.CourseClientCallbacks() {
-//          @Override
-//          public void courseResponse(Summary summary, Course course) {
-//            completableFuture.complete(course);
-//          }
-//        });
-//        Course course = completableFuture.get();
-//        compareCourseToSerializedSummary(course, summaryString);
-//      }
-//    }
+    @Test(timeout = 20000L)
+    @Graded(points = 20)
+    public void testClientGetCourse() throws JsonProcessingException, InterruptedException, ExecutionException {
+      Client client = Client.start();
+
+      for (String summaryString : summaries) {
+        Summary summary = mapper.readValue(summaryString, Summary.class);
+        CompletableFuture<Course> completableFuture = new CompletableFuture<>();
+        client.getCourse(summary, new Client.CourseClientCallbacks() {
+          @Override
+          public void courseResponse(Summary summary, Course course) {
+            completableFuture.complete(course);
+          }
+        });
+        Course course = completableFuture.get();
+        compareCourseToSerializedSummary(course, summaryString);
+      }
+    }
 
     /**
      * Test CourseActivity with intent.
      */
-//    @Test(timeout = 10000L)
-//    @Graded(points = 20)
-//    public void testCourseView() throws JsonProcessingException {
-//      for (String summaryString : summaries.subList(0, 4)) {
-//        Intent intent = new Intent(ApplicationProvider.getApplicationContext(), CourseActivity.class);
-//        intent.putExtra("COURSE", summaryString);
-//        ActivityScenario<CourseActivity> courseScenario = ActivityScenario.launch(intent);
-//        courseScenario.moveToState(Lifecycle.State.CREATED);
-//        courseScenario.moveToState(Lifecycle.State.RESUMED);
-//        ObjectNode summary = (ObjectNode) mapper.readTree(summaryString);
-//        onView(ViewMatchers.withText(summary.get("description").asText())).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
-//      }
-//    }
+    @Test(timeout = 10000L)
+    @Graded(points = 20)
+    public void testCourseView() throws JsonProcessingException {
+      for (String summaryString : summaries.subList(0, 4)) {
+        Intent intent = new Intent(ApplicationProvider.getApplicationContext(), CourseActivity.class);
+        intent.putExtra("COURSE", summaryString);
+        ActivityScenario<CourseActivity> courseScenario = ActivityScenario.launch(intent);
+        courseScenario.moveToState(Lifecycle.State.CREATED);
+        courseScenario.moveToState(Lifecycle.State.RESUMED);
+        ObjectNode summary = (ObjectNode) mapper.readTree(summaryString);
+        onView(ViewMatchers.withText(summary.get("description").asText())).check(ViewAssertions.matches(ViewMatchers.isDisplayed()));
+      }
+    }
 
     /**
      * Test onClick CourseActivity launch from MainActivity

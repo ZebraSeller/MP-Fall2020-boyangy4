@@ -1,5 +1,6 @@
 package edu.illinois.cs.cs125.fall2020.mp.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.SearchView;
@@ -11,13 +12,14 @@ import edu.illinois.cs.cs125.fall2020.mp.R;
 import edu.illinois.cs.cs125.fall2020.mp.adapters.CourseListAdapter;
 import edu.illinois.cs.cs125.fall2020.mp.application.CourseableApplication;
 import edu.illinois.cs.cs125.fall2020.mp.databinding.ActivityMainBinding;
+import edu.illinois.cs.cs125.fall2020.mp.models.Course;
 import edu.illinois.cs.cs125.fall2020.mp.models.Summary;
 import edu.illinois.cs.cs125.fall2020.mp.network.Client;
 import java.util.Arrays;
 import java.util.List;
 
 /** Main activity showing the course summary list. */
-public final class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity
     implements SearchView.OnQueryTextListener,
         SortedListAdapter.Callback,
         Client.CourseClientCallbacks,
@@ -37,6 +39,7 @@ public final class MainActivity extends AppCompatActivity
   // List of courses retrieved from the backend server
   @SuppressWarnings("FieldCanBeLocal")
   private List<Summary> courses;
+  private Course currentCourse;
 
   /**
    * Called when this activity is created.
@@ -140,5 +143,9 @@ public final class MainActivity extends AppCompatActivity
    * @param course the course that was clicked
    */
   @Override
-  public void onCourseClicked(final Summary course) {}
+  public void onCourseClicked(final Summary course) {
+    Intent startCourseActivity = new Intent(this, CourseActivity.class);
+    startCourseActivity.putExtra("SUMMARY", course.toString());
+    startActivity(startCourseActivity);
+  }
 }

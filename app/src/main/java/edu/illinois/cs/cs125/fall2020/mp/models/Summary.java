@@ -6,6 +6,8 @@ import androidx.annotation.NonNull;
 
 import com.github.wrdlbrnft.sortedlistadapter.SortedListAdapter;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -120,6 +122,15 @@ public class Summary implements SortedListAdapter.ViewModel {
         && Objects.equals(semester, course.semester)
         && Objects.equals(department, course.department)
         && Objects.equals(number, course.number);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @NotNull
+  @Override
+  public String toString() {
+    return year + "/" + semester + "/" + department + "/" + number + "/" + title;
   }
 
   /**
