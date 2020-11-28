@@ -175,10 +175,33 @@ public final class Client {
       @NonNull final Summary summary,
       @NonNull final String clientID,
       @NonNull final CourseClientCallbacks callbacks) {
-    throw new IllegalStateException("Not implemented");
+//    String url = CourseableApplication.SERVER_URL + "course/" + summary.getYear() + "/"
+//        + summary.getSemester() + "/" + summary.getDepartment() + "/" + summary.getNumber()
+//        + "?client=" + clientID;
+//    StringRequest summaryRequest =
+//        new StringRequest(
+//            Request.Method.GET,
+//            url,
+//            response -> callbacks.yourRating(summary,),
+//            error -> Log.e(TAG, error.toString()));
+//    StringRequest summaryRequest =
+//        new StringRequest(
+//            Request.Method.POST,
+//            url,
+//            response -> callbacks.testPost(inputString),
+//            error -> Log.e(TAG, error.toString()))  {
+//          @Override
+//          public byte[] getBody() throws AuthFailureError {
+//            System.out.println("client.setString: inputstring is " + inputString);
+//            System.out.println("client.setString: inputstring bytes is " + inputString.getBytes().toString());
+//            return inputString.getBytes();
+//          }
+//        };
+//    requestQueue.add(summaryRequest);
+    throw new IllegalStateException("not implemented");
   }
   /**
-   * Retrieve rating information for a summary.
+   * Post rating information for a summary.
    *
    * @param summary the summary to get other information
    * @param rating the rating of the Client
