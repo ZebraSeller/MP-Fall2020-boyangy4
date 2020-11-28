@@ -56,6 +56,6 @@ public class Rating {
    * @return JSON style string
    */
   public String toStringJSON() {
-    return "{" + "\"clientID\":\"" + clientID + "\",\"rating\":\"" + getRating() + "\"}";
+    return "{" + "\"id\":\"" + clientID + "\",\"rating\":\"" + getRating() + "\"}";
   }
 }

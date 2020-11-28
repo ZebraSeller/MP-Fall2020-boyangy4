@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import edu.illinois.cs.cs125.fall2020.mp.application.CourseableApplication;
 import edu.illinois.cs.cs125.fall2020.mp.models.Rating;
 import edu.illinois.cs.cs125.fall2020.mp.models.Summary;
@@ -15,6 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Scanner;
+
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -96,24 +99,26 @@ public final class Server extends Dispatcher {
     //following part checks for invalid course info.
     String summary = summaries.get(parts[0] + "_" + parts[1]);
     if (summary != null && summary.contains("\"number\" : \"" + parts[3])) {
-      System.out.println("getRating: found the object in map.");
+      System.out.println("getRating: found the object in map Summaries, OFC.");
     } else {
       System.out.println("getRating: specified course not found in map");
       return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
     }
     if (ratings.containsKey(key)) {
+      System.out.println("getRating: key is found in ratings");
       for (Rating rating : ratings.get(key)) {
         if (rating.getId().equals(userID)) {
-          ratingGottenFromStorage = rating.getRating();
+          System.out.println("getRating: the Rating is" + rating.toString());
           return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK)
-              .setBody(ratingGottenFromStorage.toString());
+              .setBody(rating.toStringJSON());
         }
       }
       System.out.println("getRating: rating not found");
-      ratingGottenFromStorage = -1.0;
+      Rating notFoundRating = new Rating(userID, -1.0d);
       return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK)
-          .setBody(ratingGottenFromStorage.toString());
+          .setBody(notFoundRating.toStringJSON());
     }
+    System.out.println("getRating: ratings Does not contain key");
     //not entering if statement means not ratings for the course.
     Rating rating = new Rating(userID, Rating.NOT_RATED);
     return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(rating.toStringJSON());
@@ -121,8 +126,65 @@ public final class Server extends Dispatcher {
   }
   private MockResponse setRating(
       @NonNull final RecordedRequest request,
-      @NonNull final String path) {
-    return null;
+      @NonNull final String path) throws JsonProcessingException {
+    String requestBodyRaw = request.getBody().readUtf8();
+    System.out.println("setRating: request body is " + requestBodyRaw);
+    String userID;
+    System.out.println("setRating: path is " + path);
+    if (path.contains("/?")) {
+      System.out.println("setRating: 400 Bad Request due to: wrong format before UUID");
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+    }
+    if (path.contains("client")) {
+      userID = path.split("\\?")[1].replaceFirst("client=", "");
+      System.out.println("setRating: userID is " + userID);
+    } else {
+      System.out.println("setRating: 400 Bad Request due to: no UUID in URL");
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+    // extracts UUID.
+    }
+    final int partsLength = 4;
+    String[] parts = path.split("/");
+    if (parts.length != partsLength) {
+      System.out.println("setRating: 404 Not Found due to: Wrong number of parts in URL");
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
+    }
+    parts[3] = parts[3].substring(0, 3);
+    String key = parts[0] + parts[1] + parts[2] + parts[3]; // this part is to get course info key ready.
+    System.out.println("setRating: key is " + key);
+    ObjectNode requestBody = (ObjectNode) mapper.readTree(requestBodyRaw);
+    double rateNum = Double.parseDouble(requestBody.get("rating").asText());
+    System.out.println("setRating: rating given in request is " + rateNum);
+    if (ratings.containsKey(key)) {
+      System.out.println("setRating: key is contained in the map ratings.");
+      for (Rating rating : ratings.get(key)) {
+        if (rating.getId().equals(userID)) {
+          System.out.println("setRating: current User had a rating already");
+          System.out.println("setRating: rateNum is " + rateNum);
+          ratings.get(key).remove(rating);
+          Rating newRating = new Rating(userID, rateNum);
+          ratings.get(key).add(newRating);
+          return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK)
+              .setBody(newRating.toStringJSON());
+        }
+      }
+      System.out.println("setRating: key is contained in the map ratings, but No rating of this "
+          + "user exist.");
+      Rating newRating = new Rating(userID, rateNum);
+      ratings.get(key).add(newRating);
+      System.out.println("setRating: new Rating added to list of ratings for the key " + key);
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK)
+          .setBody(newRating.toStringJSON());
+    } else {
+      System.out.println("setRating: key is NOT contained in the map ratings.");
+      Rating rating = new Rating(userID, rateNum);
+      ArrayList<Rating> rates = new ArrayList<>();
+      rates.add(rating);
+      ratings.put(key, rates);
+      System.out.println("setRating: new Rating added");
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK)
+          .setBody(rating.toStringJSON());
+    }
   }
 
   @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
@@ -160,9 +222,12 @@ public final class Server extends Dispatcher {
       } else if (path.equals("/test/")) {
         return testPost(request);
       } else if (path.startsWith("/rating/")) {
+        System.out.println("dispatch: request is rating");
         if (request.getMethod().equals("GET")) {
+          System.out.println("dispatch: request is GET");
           return getRating(request, path.replaceFirst("/rating/", ""));
         } else if (request.getMethod().equals("POST")) {
+          System.out.println("dispatch: request is POST");
           return setRating(request, path.replaceFirst("/rating/", ""));
         }
       }
