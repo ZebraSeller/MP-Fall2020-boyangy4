@@ -203,6 +203,7 @@ public final class Client {
     requestQueue.add(summaryRequest);
   }
 
+  private String clientIDForPost = CourseableApplication.getClientID();
   /**
    * Post rating information for a summary.
    *
@@ -214,7 +215,23 @@ public final class Client {
       @NonNull final Summary summary,
       @NonNull final Rating rating,
       @NonNull final CourseClientCallbacks callbacks) {
-    throw new IllegalStateException("Not implemented");
+    String url = CourseableApplication.SERVER_URL + "rating/" + summary.getYear() + "/"
+        + summary.getSemester() + "/" + summary.getDepartment() + "/" + summary.getNumber()
+        + "?client=" + clientIDForPost;
+    System.out.println("Client.postRating: URL is " + url);
+    StringRequest summaryRequest =
+        new StringRequest(
+            Request.Method.POST,
+            url,
+            response -> callbacks.yourRating(summary, rating),
+            error -> Log.e(TAG, error.toString())) {
+          @Override
+          public byte[] getBody() throws AuthFailureError {
+            System.out.println("Client.PostRating: rating JSON is " + rating.toStringJSON());
+            return rating.toStringJSON().getBytes();
+          }
+        };
+    requestQueue.add(summaryRequest);
   }
 
 
@@ -287,6 +304,6 @@ public final class Client {
         .start();
   }
 
-  //private String clientID = CourseableApplication.getClientID();
+
 
 }
