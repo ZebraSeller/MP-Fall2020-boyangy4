@@ -16,6 +16,8 @@ import com.android.volley.toolbox.StringRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import edu.illinois.cs.cs125.fall2020.mp.application.CourseableApplication;
 import edu.illinois.cs.cs125.fall2020.mp.models.Course;
 import edu.illinois.cs.cs125.fall2020.mp.models.Rating;
@@ -34,6 +36,7 @@ public final class Client {
   private static final String TAG = Client.class.getSimpleName();
   private static final int INITIAL_CONNECTION_RETRY_DELAY = 1000;
 
+  private final ObjectMapper mapper = new ObjectMapper();
   /**
    * Course API client callback interface.
    *
@@ -175,31 +178,31 @@ public final class Client {
       @NonNull final Summary summary,
       @NonNull final String clientID,
       @NonNull final CourseClientCallbacks callbacks) {
-//    String url = CourseableApplication.SERVER_URL + "course/" + summary.getYear() + "/"
-//        + summary.getSemester() + "/" + summary.getDepartment() + "/" + summary.getNumber()
-//        + "?client=" + clientID;
-//    StringRequest summaryRequest =
-//        new StringRequest(
-//            Request.Method.GET,
-//            url,
-//            response -> callbacks.yourRating(summary,),
-//            error -> Log.e(TAG, error.toString()));
-//    StringRequest summaryRequest =
-//        new StringRequest(
-//            Request.Method.POST,
-//            url,
-//            response -> callbacks.testPost(inputString),
-//            error -> Log.e(TAG, error.toString()))  {
-//          @Override
-//          public byte[] getBody() throws AuthFailureError {
-//            System.out.println("client.setString: inputstring is " + inputString);
-//            System.out.println("client.setString: inputstring bytes is " + inputString.getBytes().toString());
-//            return inputString.getBytes();
-//          }
-//        };
-//    requestQueue.add(summaryRequest);
-    throw new IllegalStateException("not implemented");
+    String url = CourseableApplication.SERVER_URL + "rating/" + summary.getYear() + "/"
+        + summary.getSemester() + "/" + summary.getDepartment() + "/" + summary.getNumber()
+        + "?client=" + clientID;
+    System.out.println("Client.getRating: URL is " + url);
+    StringRequest summaryRequest =
+        new StringRequest(
+            Request.Method.GET,
+            url,
+            response -> {
+              try {
+                System.out.println("Client.getRating: response is " + response);
+                ObjectNode responseDecoded = (ObjectNode) mapper.readTree(response);
+                String userID = responseDecoded.get("id").asText();
+                double rateNum = Double.parseDouble(responseDecoded.get("rating").asText());
+                System.out.println("Client.getRating: userID retrieved is " + userID);
+                Rating rating = new Rating(userID, rateNum);
+                callbacks.yourRating(summary, rating);
+              } catch (JsonProcessingException e) {
+                e.printStackTrace();
+              }
+            },
+            error -> Log.e(TAG, error.toString()));
+    requestQueue.add(summaryRequest);
   }
+
   /**
    * Post rating information for a summary.
    *

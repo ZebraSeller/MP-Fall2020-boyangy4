@@ -120,8 +120,9 @@ public final class Server extends Dispatcher {
     }
     System.out.println("getRating: ratings Does not contain key");
     //not entering if statement means not ratings for the course.
-    Rating rating = new Rating(userID, Rating.NOT_RATED);
-    return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(rating.toStringJSON());
+    Rating newRating = new Rating(userID, Rating.NOT_RATED);
+    System.out.println("getRating: newRating id is " + userID);
+    return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(newRating.toStringJSON());
 
   }
   private MockResponse setRating(
