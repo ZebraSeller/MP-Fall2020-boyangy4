@@ -58,7 +58,6 @@ public class CourseActivity extends MainActivity implements
     } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
-
     CourseableApplication application = (CourseableApplication) getApplication();
     application.getCourseClient().getCourse(key, this);
     binding.textTitle.setText(key.getTitle());
@@ -89,8 +88,6 @@ public class CourseActivity extends MainActivity implements
       }
     });
   }
-
-
   /**
    * Callback called when the client has retrieved the course using summary specified.
    *
