@@ -2,6 +2,8 @@ package edu.illinois.cs.cs125.fall2020.mp.network;
 
 import android.util.Log;
 import androidx.annotation.NonNull;
+
+import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
 import com.android.volley.ExecutorDelivery;
 import com.android.volley.Network;
@@ -16,6 +18,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.illinois.cs.cs125.fall2020.mp.application.CourseableApplication;
 import edu.illinois.cs.cs125.fall2020.mp.models.Course;
+import edu.illinois.cs.cs125.fall2020.mp.models.Rating;
 import edu.illinois.cs.cs125.fall2020.mp.models.Summary;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -52,6 +55,18 @@ public final class Client {
      * @param course the course
      */
     default void courseResponse(Summary summary, Course course) {}
+    /**
+     * Return rating for the given summary.
+     *
+     * @param summary the summary that was retrieved
+     * @param rating the rating
+     */
+    default void yourRating(Summary summary, Rating rating) {}
+    /**
+     * Return rating for the given summary.
+     * @param  inputString input string.
+     */
+    default void testPost(String inputString) {}
   }
 
   /**
@@ -81,6 +96,46 @@ public final class Client {
             error -> Log.e(TAG, error.toString()));
     requestQueue.add(summaryRequest);
   }
+  /**
+   * Retrieve course information for a summary.
+   *
+   * @param inputString the String
+   * @param callbacks callbacks
+   */
+  public void setString(
+      @NonNull final String inputString,
+      @NonNull final Client.CourseClientCallbacks callbacks) {
+    String url = CourseableApplication.SERVER_URL + "test/";
+    StringRequest summaryRequest =
+        new StringRequest(
+            Request.Method.POST,
+            url,
+            response -> callbacks.testPost(inputString),
+            error -> Log.e(TAG, error.toString()))  {
+          @Override
+          public byte[] getBody() throws AuthFailureError {
+            System.out.println("client.setString: inputstring is " + inputString);
+            System.out.println("client.setString: inputstring bytes is " + inputString.getBytes().toString());
+            return inputString.getBytes();
+          }
+        };
+    requestQueue.add(summaryRequest);
+  }
+  /**
+   * Retrieve course information for a summary.
+   * @param callbacks callbacks
+   */
+  public void getString(@NonNull final Client.CourseClientCallbacks callbacks) {
+    System.out.println("GetString called");
+    String url = CourseableApplication.SERVER_URL + "test/";
+    StringRequest summaryRequest =
+        new StringRequest(
+            Request.Method.GET,
+            url,
+            response -> callbacks.testPost(response.toString()),
+            error -> Log.e(TAG, error.toString()));
+    requestQueue.add(summaryRequest);
+  }
 
   /**
    * Retrieve course information for a summary.
@@ -107,6 +162,33 @@ public final class Client {
             },
             error -> Log.e(TAG, error.toString()));
     requestQueue.add(summaryRequest);
+  }
+
+  /**
+   * Retrieve rating information for a summary.
+   *
+   * @param summary the summary to get other information
+   * @param clientID the ID of the Client
+   * @param callbacks the callback that will receive the result
+   */
+  public void getRating(
+      @NonNull final Summary summary,
+      @NonNull final String clientID,
+      @NonNull final CourseClientCallbacks callbacks) {
+    throw new IllegalStateException("Not implemented");
+  }
+  /**
+   * Retrieve rating information for a summary.
+   *
+   * @param summary the summary to get other information
+   * @param rating the rating of the Client
+   * @param callbacks the callback that will receive the result
+   */
+  public void postRating(
+      @NonNull final Summary summary,
+      @NonNull final Rating rating,
+      @NonNull final CourseClientCallbacks callbacks) {
+    throw new IllegalStateException("Not implemented");
   }
 
 
@@ -178,4 +260,7 @@ public final class Client {
             })
         .start();
   }
+
+  //private String clientID = CourseableApplication.getClientID();
+
 }

@@ -1,15 +1,16 @@
 package edu.illinois.cs.cs125.fall2020.mp.network;
 
-
 import androidx.annotation.NonNull;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.illinois.cs.cs125.fall2020.mp.application.CourseableApplication;
+import edu.illinois.cs.cs125.fall2020.mp.models.Rating;
 import edu.illinois.cs.cs125.fall2020.mp.models.Summary;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -49,6 +50,81 @@ public final class Server extends Dispatcher {
     return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(summary);
   }
 
+  private String theString = "server: The String";
+  private MockResponse testPost(@NonNull final RecordedRequest request) {
+    if (request.getMethod().equals("GET")) {
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(theString);
+    } else if (request.getMethod().equals("POST")) {
+      theString = request.getBody().readUtf8();
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP).setHeader(
+          "Location", "/test/"
+      ); // this is a redirect ^^.
+      //return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK);
+    }
+    return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+  }
+  //map for storing ratings, string key is course INFo, Rating is value and user ID.
+  private Map<String, ArrayList<Rating>> ratings = new HashMap<>();
+
+  private MockResponse getRating(
+      @NonNull final RecordedRequest request,
+      @NonNull final String path) {
+    String userID;
+    System.out.println("getRating: path is " + path);
+    if (path.contains("/?")) {
+      System.out.println("getRating: 400 Bad Request due to: wrong format before UUID");
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+    }
+    if (path.contains("client")) {
+      userID = path.split("\\?")[1].replaceFirst("client=", "");
+      System.out.println("getRating: userID is " + userID);
+    } else {
+      System.out.println("getRating: 400 Bad Request due to: no UUID in URL");
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_BAD_REQUEST);
+    }
+
+    final int partsLength = 4;
+    String[] parts = path.split("/");
+    if (parts.length != partsLength) {
+      System.out.println("getRating: 404 Not Found due to: Wrong parts length");
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
+    }
+    parts[3] = parts[3].substring(0, 3);
+    String key = parts[0] + parts[1] + parts[2] + parts[3]; // this part is to get course info key ready.
+    System.out.println("getRating: key is " + key);
+    Double ratingGottenFromStorage;
+    //following part checks for invalid course info.
+    String summary = summaries.get(parts[0] + "_" + parts[1]);
+    if (summary != null && summary.contains("\"number\" : \"" + parts[3])) {
+      System.out.println("getRating: found the object in map.");
+    } else {
+      System.out.println("getRating: specified course not found in map");
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
+    }
+    if (ratings.containsKey(key)) {
+      for (Rating rating : ratings.get(key)) {
+        if (rating.getId().equals(userID)) {
+          ratingGottenFromStorage = rating.getRating();
+          return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK)
+              .setBody(ratingGottenFromStorage.toString());
+        }
+      }
+      System.out.println("getRating: rating not found");
+      ratingGottenFromStorage = -1.0;
+      return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK)
+          .setBody(ratingGottenFromStorage.toString());
+    }
+    //not entering if statement means not ratings for the course.
+    Rating rating = new Rating(userID, Rating.NOT_RATED);
+    return new MockResponse().setResponseCode(HttpURLConnection.HTTP_OK).setBody(rating.toStringJSON());
+
+  }
+  private MockResponse setRating(
+      @NonNull final RecordedRequest request,
+      @NonNull final String path) {
+    return null;
+  }
+
   @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
   private final Map<Summary, String> courses = new HashMap<>();
 
@@ -81,9 +157,18 @@ public final class Server extends Dispatcher {
         return getSummary(path.replaceFirst("/summary/", ""));
       } else if (path.startsWith("/course/")) {
         return getCourse(path.replaceFirst("/course/", ""));
+      } else if (path.equals("/test/")) {
+        return testPost(request);
+      } else if (path.startsWith("/rating/")) {
+        if (request.getMethod().equals("GET")) {
+          return getRating(request, path.replaceFirst("/rating/", ""));
+        } else if (request.getMethod().equals("POST")) {
+          return setRating(request, path.replaceFirst("/rating/", ""));
+        }
       }
       return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
     } catch (Exception e) {
+      System.out.println("Error is " + e.toString());
       return new MockResponse().setResponseCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
     }
   }
